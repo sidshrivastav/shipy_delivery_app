@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:id="@+id/root"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+
+    <com.gauravbhola.ripplepulsebackground.RipplePulseLayout
+        android:id="@+id/layout_ripplepulse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:clipChildren="false"
+        android:gravity="center"
+        app:duration="1000"
+        app:endRadius="100dp"
+        app:rippleColor="@color/colorPrimary"
+        app:rippleType="fill"
+        app:startRadius="42dp"
+        app:strokeWidth="2dp">
+
+        <TextView
+            android:id="@+id/layoutGetOrders"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_circle"
+            android:gravity="center"
+            android:text="Get Orders"
+            android:textColor="@android:color/white" />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieAnimationView"
+            android:layout_width="120dp"
+            android:layout_height="120dp"/>
+    </com.gauravbhola.ripplepulsebackground.RipplePulseLayout>
+
+
+</RelativeLayout>
