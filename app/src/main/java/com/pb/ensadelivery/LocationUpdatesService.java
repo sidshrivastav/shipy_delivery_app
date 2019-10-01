@@ -32,6 +32,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.pb.ensadelivery.models.OrderModel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -125,6 +126,8 @@ public class LocationUpdatesService extends Service {
      */
     private Location mLocation;
 
+    DatabaseHelper db;
+
 
     @SuppressWarnings("deprecation")
     public LocationUpdatesService() {
@@ -133,6 +136,9 @@ public class LocationUpdatesService extends Service {
     @SuppressWarnings("deprecation")
     @Override
     public void onCreate() {
+
+        db = new DatabaseHelper(this);
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mLocationCallback = new LocationCallback() {
@@ -292,37 +298,79 @@ public class LocationUpdatesService extends Service {
 
         CharSequence text = Utils.getLocationText(mLocation);
 
-        // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
-        intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
+        OrderModel orderModel = db.getNearbyOrder(mLocation.getLatitude(), mLocation.getLongitude());
 
-        // The PendingIntent that leads to a call to onStartCommand() in this service.
-        PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // The PendingIntent to launch activity.
-        PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+        if(orderModel!=null) {
+            Intent intent1 = new Intent(this, MainActivity.class);
+            Log.d("OrderModel: ", orderModel.toString());
+            // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
+            intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .addAction(R.drawable.ic_launcher_foreground, getString(R.string.app_name),
-                        activityPendingIntent)
-                .addAction(R.drawable.ic_launcher_foreground, getString(R.string.app_name),
-                        servicePendingIntent)
-                .setContentText(text)
-                .setContentTitle(Utils.getLocationTitle(this))
-                .setOngoing(true)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setTicker(text)
-                .setWhen(System.currentTimeMillis());
+            // The PendingIntent that leads to a call to onStartCommand() in this service.
+            PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // Set the Channel ID for Android O.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId(CHANNEL_ID); // Channel ID
+            // The PendingIntent to launch activity.
+            PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(this, QRScanner.class), 0);
+            intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                    .addAction(R.drawable.ic_launcher_foreground, "Open App",
+                            activityPendingIntent)
+                    .addAction(R.drawable.ic_launcher_foreground, "Remove Listener",
+                            servicePendingIntent)
+                    .setContentIntent(activityPendingIntent)
+                    .setContentText("Special Code: " + orderModel.getSpecialCode())
+                    .setContentTitle("You are near to a delivery location")
+                    .setOngoing(true)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setTicker(text)
+                    .setWhen(System.currentTimeMillis());
+
+
+            // Set the Channel ID for Android O.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.setChannelId(CHANNEL_ID); // Channel ID
+            }
+
+
+            return builder.build();
+        }else{
+            intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
+
+            // The PendingIntent that leads to a call to onStartCommand() in this service.
+            PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // The PendingIntent to launch activity.
+            PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(this, MainActivity.class), 0);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                    .addAction(R.drawable.ic_launcher_foreground, "Open App",
+                            activityPendingIntent)
+                    .addAction(R.drawable.ic_launcher_foreground, "Remove Listener",
+                            servicePendingIntent)
+                    .setContentText("Listening for location")
+                    .setContentTitle(Utils.getLocationTitle(getApplicationContext()))
+                    .setOngoing(true)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setTicker(text)
+                    .setWhen(System.currentTimeMillis());
+
+            // Set the Channel ID for Android O.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.setChannelId(CHANNEL_ID); // Channel ID
+            }
+
+
+            return builder.build();
         }
-
-
-        return builder.build();
     }
 
     private void getLastLocation() {
@@ -362,7 +410,7 @@ public class LocationUpdatesService extends Service {
             longitude = location.getLongitude();
 
             // Here using to call Save to serverMethod
-            SavetoServer();
+//            SavetoServer();
 
         }
     }

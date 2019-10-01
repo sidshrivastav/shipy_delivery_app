@@ -18,6 +18,30 @@ public class OrderModel {
     @SerializedName("delivery_longitude")
     String deliveryLongitute;
 
+    @SerializedName("special_code")
+    String specialCode;
+
+    @Override
+    public String toString() {
+        return "OrderModel{" +
+                "orderId=" + orderId +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", deliveryLatitude='" + deliveryLatitude + '\'' +
+                ", deliveryLongitute='" + deliveryLongitute + '\'' +
+                ", specialCode='" + specialCode + '\'' +
+                '}';
+    }
+
+    public String getSpecialCode() {
+        return specialCode;
+    }
+
+    public void setSpecialCode(String specialCode) {
+        this.specialCode = specialCode;
+    }
+
+    public static final String CREATE_TABLE =
+            "CREATE TABLE  OrderDelivery (orderId INTEGER PRIMARY KEY, lat TEXT,lang TEXT, address TEXT, specialCode TEXT)";
 
     public int getOrderId() {
         return orderId;
